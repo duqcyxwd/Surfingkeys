@@ -1681,9 +1681,3 @@ var ChromeService = (function() {
   chrome.runtime.setUninstallURL('http://brookhong.github.io/2018/01/30/why-did-you-uninstall-surfingkeys.html');
   return self;
 })();
-
-console.log('Hi'); // REMOVETAG
-
-function hi() {
-  console.log('Hi'); // REMOVETAG
-}

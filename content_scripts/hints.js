@@ -51,7 +51,6 @@ var Hints = (function() {
         }
       } else {
         var key = event.sk_keyName;
-
         if (isCapital(key)) {
           shiftKey = true;
         }
@@ -255,15 +254,23 @@ var Hints = (function() {
 
   self.genLabels = function(M) {
     if (M <= self.characters.length) {
-      return self.characters
-        .slice(0, M)
-        .toUpperCase()
-        .split('');
+      if (self.filterHints) {
+        return self.characters
+          .slice(0, M)
+          .toUpperCase()
+          .split('');
+      } else {
+        return self.characters
+          .slice(0, M)
+          .toLowerCase()
+          .split('');
+      }
     }
     var codes = [];
     var genCodeWord = function(N, length) {
       for (var i = 0, word = ''; i < length; i++) {
-        word += self.characters.charAt(N % self.characters.length).toUpperCase();
+        var character = self.characters.charAt(N % self.characters.length);
+        word += self.filterHints ? character.toUpperCase() : character.toLowerCase();
         N = ~~(N / self.characters.length);
       }
       codes.push(
@@ -384,8 +391,6 @@ var Hints = (function() {
 
   function createHintsForClick(cssSelector, attrs) {
     self.statusLine = 'Hints to click. ';
-
-    self.statusLine += self.filterHints ? 'FilterHints: On;' : 'FilterHints: Off;';
     attrs = Object.assign(
       {
         active: true,
