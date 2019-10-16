@@ -1,4 +1,2 @@
-function usePdfViewer() {
-}
-function readText(text, options) {
-}
+function usePdfViewer() {}
+function readText(text, options) {}

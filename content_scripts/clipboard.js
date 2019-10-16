@@ -1,46 +1,45 @@
 var Clipboard = (function(mode) {
-    var self = {};
+  var self = {};
 
-    var holder = document.createElement('textarea');
-    holder.contentEditable = true;
-    holder.enableAutoFocus = true;
-    holder.id = 'sk_clipboard';
+  var holder = document.createElement('textarea');
+  holder.contentEditable = true;
+  holder.enableAutoFocus = true;
+  holder.id = 'sk_clipboard';
 
-    function clipboardActionWithSelectionPreserved(cb) {
-        actionWithSelectionPreserved(function(selection) {
-            // avoid editable body
-            document.documentElement.appendChild(holder);
+  function clipboardActionWithSelectionPreserved(cb) {
+    actionWithSelectionPreserved(function(selection) {
+      // avoid editable body
+      document.documentElement.appendChild(holder);
 
-            cb(selection);
+      cb(selection);
 
-            holder.remove();
-        });
+      holder.remove();
+    });
+  }
+
+  self.read = function(onReady) {
+    clipboardActionWithSelectionPreserved(function() {
+      holder.value = '';
+      setInnerHTML(holder, '');
+      holder.focus();
+      document.execCommand('Paste');
+    });
+    var data = holder.value;
+    if (data === '') {
+      data = holder.innerHTML.replace(/<br>/gi, '\n');
     }
+    onReady({ data: data });
+  };
 
-    self.read = function(onReady) {
-        clipboardActionWithSelectionPreserved(function() {
-            holder.value = '';
-            setInnerHTML(holder, '');
-            holder.focus();
-            document.execCommand("Paste");
-        });
-        var data = holder.value;
-        if (data === "") {
-            data = holder.innerHTML.replace(/<br>/gi,"\n");
-        }
-        onReady({data: data});
-    };
+  self.write = function(text) {
+    clipboardActionWithSelectionPreserved(function() {
+      holder.value = text;
+      holder.select();
+      document.execCommand('copy');
+      holder.value = '';
+    });
+    Front.showBanner('Copied: ' + text);
+  };
 
-    self.write = function(text) {
-        clipboardActionWithSelectionPreserved(function() {
-            holder.value = text;
-            holder.select();
-            document.execCommand('copy');
-            holder.value = '';
-        });
-        Front.showBanner("Copied: " + text);
-    };
-
-    return self;
-
+  return self;
 })();

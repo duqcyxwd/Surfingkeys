@@ -1,9 +1,9 @@
 mermaid.initialize({
-    startOnLoad: false,
-    theme: "default",
-    flowchart: {
-        curve: "basis"
-    }
+  startOnLoad: false,
+  theme: 'default',
+  flowchart: {
+    curve: 'basis'
+  }
 });
 
 var sequenceDiagramExample = `sequenceDiagram
@@ -63,43 +63,43 @@ Class01 : int chimp
 Class01 : int gorilla
 Class08 <--> C2: Cool label`;
 
-var mermaidDiv = document.querySelector("div.mermaid");
+var mermaidDiv = document.querySelector('div.mermaid');
 function drawDiagram(code) {
-    Front.source = code;
-    mermaidDiv.removeAttribute("data-processed");
-    setInnerHTML(mermaidDiv, code);
-    try {
-        mermaid.init({noteMargin: 10}, ".mermaid");
-    } catch (e) {
-        Front.showPopup(e.toString());
-    }
+  Front.source = code;
+  mermaidDiv.removeAttribute('data-processed');
+  setInnerHTML(mermaidDiv, code);
+  try {
+    mermaid.init({ noteMargin: 10 }, '.mermaid');
+  } catch (e) {
+    Front.showPopup(e.toString());
+  }
 }
 
 mapkey('<Ctrl-Alt-d>', '#99Edit mermaid source', function() {
-    Front.showEditor(Front.source, drawDiagram, 'mermaid');
+  Front.showEditor(Front.source, drawDiagram, 'mermaid');
 });
 
 mapkey(';f', '#99Load flowchart example', function() {
-    drawDiagram(flowChartExample);
+  drawDiagram(flowChartExample);
 });
 
 mapkey(';s', '#99Load sequenceDiagram example', function() {
-    drawDiagram(sequenceDiagramExample);
+  drawDiagram(sequenceDiagramExample);
 });
 
 mapkey(';c', '#99Load classDiagram example', function() {
-    drawDiagram(classDiagramExample);
+  drawDiagram(classDiagramExample);
 });
 
 map('i', '<Ctrl-Alt-d>');
 
 mapkey('yy', '#99Generate image', function() {
-    var content = document.querySelector('div.content');
-    if (hasScroll(content, 'y', 16) || hasScroll(content, 'x', 16)) {
-        Normal.captureElement(content);
-    } else {
-        Normal.captureElement(mermaidDiv);
-    }
+  var content = document.querySelector('div.content');
+  if (hasScroll(content, 'y', 16) || hasScroll(content, 'x', 16)) {
+    Normal.captureElement(content);
+  } else {
+    Normal.captureElement(mermaidDiv);
+  }
 });
 
 Front.renderDataFromClipboard = drawDiagram;
