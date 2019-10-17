@@ -37,54 +37,75 @@ var Hints = (function() {
       holder.style.display = 'none';
     } else if (event.keyCode === KeyboardUtils.keyCodes.shiftKey) {
       flip();
+    } else if (event.keyCode === KeyboardUtils.keyCodes.enter) {
+      if (lastFocusedObject != null) {
+        _onHintKey(lastFocusedObject.link);
+        hide();
+      }
+    } else if (event.keyCode === KeyboardUtils.keyCodes.tab) {
+      var matches = refresh();
+      if (hints.length > 0) {
+        if (lastFocusedObject == null) {
+          lastFocusedObject = hints[0];
+        } else {
+          let visibleHints = [...hints].filter(h => h.style.opacity == 1);
+          let idx = visibleHints.findIndex(h => h.label === lastFocusedObject.label);
+          lastFocusedObject = visibleHints[idx + 1 >= visibleHints.length ? 0 : idx + 1];
+        }
+        refresh();
+      }
     } else if (event.keyCode === KeyboardUtils.keyCodes.altKey) {
       self.filterHints = !self.filterHints;
       refreshByTextFilter();
-    } else if (hints.length > 0) {
-      if (event.keyCode === KeyboardUtils.keyCodes.backspace) {
+    } else if (event.keyCode === KeyboardUtils.keyCodes.backspace) {
+      if (hints.length > 0) {
         if (prefix.length > 0) {
+          // Undo select
           prefix = prefix.substr(0, prefix.length - 1);
+          refreshByTextFilter();
           handleHint();
         } else if (textFilter.length > 0) {
+          // Undo Filter
           textFilter = textFilter.substr(0, textFilter.length - 1);
           refreshByTextFilter();
+          handleHint();
         }
-      } else {
-        var key = event.sk_keyName;
-        if (isCapital(key)) {
-          shiftKey = true;
-        }
-        if (key !== '') {
-          if (self.filterHints) {
-            // TODO only filter on visiable character
-            if (isCapital(key)) {
-              prefix += key;
-            } else {
+      }
+    } else if (hints.length > 0) {
+      var key = event.sk_keyName;
+      if (isCapital(key)) {
+        shiftKey = true;
+      }
+      if (key !== '') {
+        if (self.filterHints) {
+          // TODO only filter on visiable character
+          if (isCapital(key)) {
+            prefix += key;
+          } else {
+            textFilter += key;
+            refreshByTextFilter();
+          }
+          handleHint();
+        } else if (self.numericHints) {
+          if (key >= '0' && key <= '9') {
+            prefix += key;
+          } else {
+            if (!isCapital(key)) {
               textFilter += key;
               refreshByTextFilter();
             }
-            handleHint();
-          } else if (self.numericHints) {
-            if (key >= '0' && key <= '9') {
-              prefix += key;
-            } else {
-              if (!isCapital(key)) {
-                textFilter += key;
-                refreshByTextFilter();
-              }
-            }
-            handleHint();
-          } else if (self.characters.toLowerCase().indexOf(key.toLowerCase()) !== -1) {
-            prefix = prefix + key.toLowerCase();
-            handleHint();
+          }
+          handleHint();
+        } else if (self.characters.toLowerCase().indexOf(key.toLowerCase()) !== -1) {
+          prefix = prefix + key.toLowerCase();
+          handleHint();
+        } else {
+          if (self.scrollKeys.indexOf(key) === -1) {
+            // quit hints if user presses non-hint key and no keys for scrolling
+            hide();
           } else {
-            if (self.scrollKeys.indexOf(key) === -1) {
-              // quit hints if user presses non-hint key and no keys for scrolling
-              hide();
-            } else {
-              // pass on the key to next mode in stack
-              event.sk_stopPropagation = false;
-            }
+            // pass on the key to next mode in stack
+            event.sk_stopPropagation = false;
           }
         }
       }
@@ -99,6 +120,7 @@ var Hints = (function() {
   var prefix = '',
     textFilter = '',
     lastMouseTarget = null,
+    lastFocusedObject = null,
     behaviours = {
       mouseEvents: ['mouseover', 'mousedown', 'mouseup', 'click']
     },
@@ -125,7 +147,9 @@ var Hints = (function() {
   }
 
   function handleHint() {
+    // Handle When hint is selected
     var matches = refresh();
+
     if (matches.length === 1) {
       if (matches[0].label.toUpperCase() === prefix.toUpperCase()) {
         Normal.appendKeysForRepeat('Hints', prefix);
@@ -138,8 +162,7 @@ var Hints = (function() {
           hide();
         }
       } else {
-        matches[0].link.focus();
-        hide();
+        lastFocusedObject = matches[0];
       }
     } else if (matches.length === 0) {
       hide();
@@ -170,6 +193,7 @@ var Hints = (function() {
       hints.map(cleanHint);
       hints = hints.filter(hintMatch);
     }
+
     var hintLabels = self.genLabels(hints.length);
     hints.forEach(function(e, i) {
       e.label = hintLabels[i];
@@ -182,18 +206,28 @@ var Hints = (function() {
     var hints = holder.querySelectorAll('#sk_hints>div:not(:empty)');
     hints.forEach(function(hint) {
       var label = hint.label;
+      hint.style.opacity = 1;
+      hint.style.background = '#383c4a';
+      hint.style.border = '0.25em solid #383c4a';
+
       if (prefix.length === 0) {
-        hint.style.opacity = 1;
         setInnerHTML(hint, label);
         matches.push(hint);
       } else if (label.indexOf(prefix) === 0) {
-        hint.style.opacity = 1;
         setInnerHTML(hint, `<span style="opacity: 0.2;">${prefix}</span>` + label.substr(prefix.length));
         matches.push(hint);
       } else {
         hint.style.opacity = 0;
       }
     });
+
+    if (lastFocusedObject != null) {
+      // <TODO>Update style later</TODO>
+      lastFocusedObject.style.background = '#6279c7';
+      lastFocusedObject.style.border = '0.25em solid #6279c7';
+    } else {
+      lastFocusedObject = matches[0];
+    }
     return matches;
   }
 
