@@ -261,9 +261,6 @@ function createFront() {
             }
             self.hidePopup();
         } else if (_inlineQuery) {
-            if (runtime.conf.autoSpeakOnInlineQuery) {
-                readText(query);
-            }
             query = query.toLocaleLowerCase();
             runtime.updateHistory('OmniQuery', query);
             httpRequest({

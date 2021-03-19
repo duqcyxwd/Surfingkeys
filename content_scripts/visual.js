@@ -332,7 +332,9 @@ function createVisual() {
         feature_group: 9,
         code: function() {
             var w = Visual.getWordUnderCursor();
-            readText(w);
+            if (runtime.conf.autoSpeakOnInlineQuery) {
+                readText(w);
+            }
             var b = cursor.getBoundingClientRect();
             Front.performInlineQuery(w, {
                 top: b.top,
